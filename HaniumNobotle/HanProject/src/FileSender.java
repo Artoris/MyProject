@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -13,9 +14,7 @@ public class FileSender {
 		FileSender nioClient = new FileSender();
 		SocketChannel socketChannel = nioClient.createChannel();
 		nioClient.sendFile(socketChannel);
-
 	}
-
 	/**
 	 * Establishes a socket channel connection
 	 *
@@ -26,7 +25,8 @@ public class FileSender {
 		SocketChannel socketChannel = null;
 		try {
 			socketChannel = SocketChannel.open();
-			SocketAddress socketAddress = new InetSocketAddress("192.168.0.44", 9999);
+			SocketAddress socketAddress = new InetSocketAddress("14.44.125.102", 9999);
+
 			socketChannel.connect(socketAddress);
 			System.out.println("Connected..Now sending the file");
 
@@ -36,15 +36,16 @@ public class FileSender {
 		return socketChannel;
 	}
 
-
 	public void sendFile(SocketChannel socketChannel) {
-		RandomAccessFile aFile = null;
+		// RandomAccessFile aFile = null;
 		try {
 			File file = new File("Wildlife.wmv");
-			aFile = new RandomAccessFile(file, "r");
-			FileChannel inChannel = aFile.getChannel();
+			FileInputStream fin = new FileInputStream(file);
+			// aFile = new RandomAccessFile(file, "r");
+			// FileChannel inChannel = aFile.getChannel();
+			FileChannel inChannel = fin.getChannel();
 			ByteBuffer buffer = ByteBuffer.allocate(1024);
-			while (inChannel.read(buffer)> 0) {
+			while (inChannel.read(buffer) != -1) {
 				buffer.flip();
 				socketChannel.write(buffer);
 				buffer.clear();
@@ -52,7 +53,8 @@ public class FileSender {
 			Thread.sleep(1000);
 			System.out.println("End of file reached..");
 			socketChannel.close();
-			aFile.close();
+			fin.close();
+			// aFile.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -60,8 +62,5 @@ public class FileSender {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }
-
